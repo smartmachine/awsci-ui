@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import Jumbotron from "react-bootstrap/Jumbotron";
+import {connect} from "react-redux";
+import {simpleAction} from "./actions/simpleAction";
 
-class App extends React.Component {
+class App extends Component {
     
     constructor(props) {
         super(props);
@@ -26,6 +28,17 @@ class App extends React.Component {
         this.setState({githubURL: host + App.encodeQueryData(queryData)});
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        console.log('componentDidUpdate()');
+        console.log('Properties:', this.props);
+        console.log('State:', this.state);
+    }
+
+
+    simpleAction = (event) => {
+      this.props.simpleAction()
+    };
+
     static encodeQueryData(data) {
         const ret = [];
         for (let d in data)
@@ -39,7 +52,9 @@ class App extends React.Component {
                 <Container className="p-3">
                     <Jumbotron>
                         <h1 className="header">Welcome To AWSci</h1>
-                        <Button href={this.state.githubURL}>Login with Github</Button>
+                        <p/>
+                        <p/>
+                        <Button    onClick={this.simpleAction}>Test redux action</Button>
                     </Jumbotron>
                 </Container>
 
@@ -48,4 +63,12 @@ class App extends React.Component {
     }
 }
 
-export default App;
+const mapStateToProps = state => ({
+    ...state
+});
+
+const mapDispatchToProps = dispatch => ({
+    simpleAction: () => dispatch(simpleAction())
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
