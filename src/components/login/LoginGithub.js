@@ -7,7 +7,7 @@ import {connect} from 'react-redux';
 
 import { parse as parseQueryString } from 'query-string';
 
-import { fetchCognitoInfo } from '../../actions/cognitoActions'
+import {fetchSession} from '../../actions/sessionActions'
 
 import ghImage from '../../assets/GitHub-Mark-Light-120px-plus.png'
 import Alert from "react-bootstrap/Alert";
@@ -16,11 +16,20 @@ class Login extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { cognitoURL: '', loginError: false }
+        this.state = { githubURL: '', loginError: false }
     }
 
     componentDidMount() {
-        this.props.getCognitoInfo()
+
+        const params = parseQueryString(this.props.location.search);
+
+        if ('code' in params && params.code != null) {
+            console.log("Github Authorization Code: " + params.code);
+            this.props.getSession(params.code);
+            //this.props.history.push('/login')
+        } else {
+            this.generateGithubURL();
+        }
     }
 
     static encodeQueryData(data) {
@@ -34,11 +43,6 @@ class Login extends Component {
         console.log('Login.componentDidUpdate()');
         console.log('  Properties:', this.props);
         console.log('  State:     ', this.state);
-        if (this.props.cognito.state === "ok" && prevProps.cognito.isFetching) {
-            let { clientId, callbackURL } = this.props.cognito;
-            this.generateCognitoURL(clientId, callbackURL)
-        }
-        /**
         if (typeof this.props.session.state !== "undefined" && this.props.session.state === "error" && prevProps.session.isFetching) {
             console.log("  Login Error!");
             this.setState({loginError: true})
@@ -49,17 +53,18 @@ class Login extends Component {
             this.setState({loginError: false});
             this.props.history.push('/');
         }
-         */
     }
 
-    generateCognitoURL = (clientId, callbackURL) => {
-        let host = 'https://auth.awsci.io/oauth2/authorize?';
+    generateGithubURL = () => {
+        let host = "https://github.com/login/oauth/authorize?";
         let queryData = {
-            response_type: 'code',
-            client_id: clientId,
-            redirect_uri: callbackURL
+            client_id: "9ba972db1d356346f618",
+            redirect_uri: "https://awsci.io/login",
+            scope: "read:user repo",
+            allow_signup: "false"
         };
-        this.setState({cognitoURL: host + Login.encodeQueryData(queryData)});
+
+        this.setState({githubURL: host + Login.encodeQueryData(queryData)});
     };
 
     closeAlert = () => {
@@ -76,8 +81,18 @@ class Login extends Component {
                     <Jumbotron>
                         <h1 className="header">Welcome To AWSci</h1>
                         <p/>
+                        {this.state.loginError &&
+                        <Alert variant="danger" onClose={this.closeAlert} dismissible>
+                            <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
+                            <p>
+                                Change this and that and try again. Duis mollis, est non commodo
+                                luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.
+                                Cras mattis consectetur purus sit amet fermentum.
+                            </p>
+                        </Alert>
+                        }
                         <p/>
-                        <Button href={this.state.cognitoURL} disabled={this.props.cognito.state !== "ok"}><Image src={ghImage} width={20}/> Github Login</Button>
+                        <Button href={this.state.githubURL} disabled={this.props.isFetching}><Image src={ghImage} width={20}/> Github Login</Button>
                         <p/>
                     </Jumbotron>
                 </Container>
@@ -91,7 +106,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    getCognitoInfo: () => dispatch(fetchCognitoInfo())
+    getSession: (code) => dispatch(fetchSession(code))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);
