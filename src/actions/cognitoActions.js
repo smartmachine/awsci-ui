@@ -13,7 +13,7 @@ export const RECEIVE_COGNITO_INFO = 'RECEIVE_COGNITO_INFO';
 const receiveCognitoInfo = (json) => {
     return {
         type: RECEIVE_COGNITO_INFO,
-        cognitoInfo: json,
+        ...json,
         receivedAt: Date.now()
     }
 };

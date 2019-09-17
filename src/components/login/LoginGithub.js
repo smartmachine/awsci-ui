@@ -32,13 +32,6 @@ class Login extends Component {
         }
     }
 
-    static encodeQueryData(data) {
-        const ret = [];
-        for (let d in data)
-            ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(data[d]));
-        return ret.join('&');
-    }
-
     componentDidUpdate(prevProps, prevState, snapshot) {
         console.log('Login.componentDidUpdate()');
         console.log('  Properties:', this.props);

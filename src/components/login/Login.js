@@ -2,70 +2,54 @@ import React, {Component} from 'react';
 import Container from 'react-bootstrap/Container';
 import Jumbotron from 'react-bootstrap/Jumbotron';
 import Button from 'react-bootstrap/Button';
-import Image from 'react-bootstrap/Image';
 import {connect} from 'react-redux';
 
 import { parse as parseQueryString } from 'query-string';
 
 import { fetchCognitoInfo } from '../../actions/cognitoActions'
+import { getAccessToken } from '../../actions/sessionActions'
 
-import ghImage from '../../assets/GitHub-Mark-Light-120px-plus.png'
 import Alert from "react-bootstrap/Alert";
+import Spinner from "react-bootstrap/Spinner";
 
 class Login extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { cognitoURL: '', loginError: false }
+        this.state = { loginError: false }
     }
 
     componentDidMount() {
-        this.props.getCognitoInfo()
-    }
+        const params = parseQueryString(this.props.location.search);
 
-    static encodeQueryData(data) {
-        const ret = [];
-        for (let d in data)
-            ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(data[d]));
-        return ret.join('&');
+        if ('code' in params && params.code != null) {
+            console.log("Cognito Authorization Code: " + params.code);
+            this.props.getAccessToken(params.code);
+            //this.props.history.push('/login')
+        } else {
+            this.props.getCognitoInfo()
+        }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         console.log('Login.componentDidUpdate()');
         console.log('  Properties:', this.props);
         console.log('  State:     ', this.state);
-        if (this.props.cognito.state === "ok" && prevProps.cognito.isFetching) {
-            let { clientId, callbackURL } = this.props.cognito;
-            this.generateCognitoURL(clientId, callbackURL)
-        }
-        /**
-        if (typeof this.props.session.state !== "undefined" && this.props.session.state === "error" && prevProps.session.isFetching) {
+        if (!this.props.session.loggedIn && prevProps.session.isFetching) {
             console.log("  Login Error!");
             this.setState({loginError: true})
         }
-        if (typeof this.props.session.state !== "undefined" && this.props.session.state === "ok") {
+        if (this.props.session.loggedIn) {
             console.log("  Logged in!");
-            sessionStorage.setItem("session", this.props.session)
             this.setState({loginError: false});
             this.props.history.push('/');
         }
-         */
     }
-
-    generateCognitoURL = (clientId, callbackURL) => {
-        let host = 'https://auth.awsci.io/oauth2/authorize?';
-        let queryData = {
-            response_type: 'code',
-            client_id: clientId,
-            redirect_uri: callbackURL
-        };
-        this.setState({cognitoURL: host + Login.encodeQueryData(queryData)});
-    };
 
     closeAlert = () => {
         this.setState({loginError: false});
         this.props.history.push('/login');
-        this.generateGithubURL();
+        this.props.getCognitoInfo()
     };
 
     render() {
@@ -76,8 +60,21 @@ class Login extends Component {
                     <Jumbotron>
                         <h1 className="header">Welcome To AWSci</h1>
                         <p/>
+                        {this.state.loginError &&
+                        <Alert variant="danger" onClose={this.closeAlert} dismissible>
+                            <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
+                            <p>
+                                Login error!  Some message: {this.props.session.error}
+                            </p>
+                        </Alert>
+                        }
                         <p/>
-                        <Button href={this.state.cognitoURL} disabled={this.props.cognito.state !== "ok"}><Image src={ghImage} width={20}/> Github Login</Button>
+                        {!this.props.session.isFetching &&
+                        <Button href={this.props.cognito.url} disabled={!this.props.cognito.hasInfo}>Login</Button>
+                        }
+                        {this.props.session.isFetching &&
+                        <Spinner animation={"border"}/>
+                        }
                         <p/>
                     </Jumbotron>
                 </Container>
@@ -91,7 +88,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    getCognitoInfo: () => dispatch(fetchCognitoInfo())
+    getCognitoInfo: () => dispatch(fetchCognitoInfo()),
+    getAccessToken: (code) => dispatch(getAccessToken(code))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);

@@ -9,6 +9,9 @@ class Home extends Component {
         console.log('Home.componentDidUpdate()');
         console.log('  Properties:', this.props);
         console.log('  State:     ', this.state);
+        if (!this.props.session.loggedIn) {
+            this.props.history.push('/login')
+        }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -28,7 +31,6 @@ class Home extends Component {
                         <p>Logged in!</p>
                     </Jumbotron>
                 </Container>
-
             </div>
         );
     }
