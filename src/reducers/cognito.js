@@ -39,6 +39,7 @@ const generateCognitoURL = (clientId, callbackURL) => {
     let queryData = {
         response_type: 'code',
         client_id: clientId,
+        scope: 'https://api.awsci.io/user email openid profile',
         redirect_uri: callbackURL
     };
     return host + encodeQueryData(queryData);
