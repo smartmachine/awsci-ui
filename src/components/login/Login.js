@@ -7,7 +7,7 @@ import {connect} from 'react-redux';
 import { parse as parseQueryString } from 'query-string';
 
 import { fetchCognitoInfo } from '../../actions/cognitoActions'
-import { getAccessToken } from '../../actions/sessionActions'
+import { getAccessToken, updateAccessToken } from '../../actions/sessionActions'
 
 import Alert from "react-bootstrap/Alert";
 import Spinner from "react-bootstrap/Spinner";
@@ -26,8 +26,10 @@ class Login extends Component {
             console.log("Cognito Authorization Code: " + params.code);
             this.props.getAccessToken(params.code);
             //this.props.history.push('/login')
+        } else if (this.hasSessionToken()) {
+            this.props.updateAccessToken();
         } else {
-            this.props.getCognitoInfo()
+                this.props.getCognitoInfo()
         }
     }
 
@@ -45,6 +47,10 @@ class Login extends Component {
             this.props.history.push('/');
         }
     }
+
+    hasSessionToken = () => {
+        return sessionStorage.getItem('AccessToken') != null;
+    };
 
     closeAlert = () => {
         this.setState({loginError: false});
@@ -89,7 +95,8 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
     getCognitoInfo: () => dispatch(fetchCognitoInfo()),
-    getAccessToken: (code) => dispatch(getAccessToken(code))
+    getAccessToken: (code) => dispatch(getAccessToken(code)),
+    updateAccessToken: () => dispatch(updateAccessToken())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);

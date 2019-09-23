@@ -2,10 +2,17 @@ import fetch from 'cross-fetch'
 
 export const REQUEST_ACCESS_TOKEN = 'REQUEST_ACCESS_TOKEN';
 
-const requestAccessToken = (code) => {
+const requestAccessToken = () => {
     return {
-        type: REQUEST_ACCESS_TOKEN,
-        code: code
+        type: REQUEST_ACCESS_TOKEN
+    }
+};
+
+export const REFRESH_ACCESS_TOKEN = 'REFRESH_ACCESS_TOKEN';
+
+const refreshAccessToken = () => {
+    return {
+        type: REFRESH_ACCESS_TOKEN
     }
 };
 
@@ -30,7 +37,7 @@ const errorAccessToken = (message) => {
 };
 
 export const getAccessToken = (code) => dispatch => {
-    dispatch(requestAccessToken(code));
+    dispatch(requestAccessToken());
 
     // curl -i  -H "Content-Type: application/json" -X POST https://api.awsci.io/cognito/login --data '{"authCode": "5300b61f9d17f536a226"}'
     return fetch('https://api.awsci.io/cognito/login', {
@@ -41,9 +48,29 @@ export const getAccessToken = (code) => dispatch => {
         body: JSON.stringify({"authCode": code})
     }).then(response => {
         return response.json();
-        },
-    ).then(json => {
+    }).then(json => {
         if (json.state === "ok") {
+            sessionStorage.setItem('AccessToken', json.access_token);
+            dispatch(receiveAccessToken(json))
+        } else {
+            dispatch(errorAccessToken(json.message))
+        }
+    });
+};
+
+export const updateAccessToken = () => dispatch => {
+    dispatch(refreshAccessToken());
+    return fetch('https://api.awsci.io/cognito/refresh', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({"access_token": sessionStorage.getItem('AccessToken')})
+    }).then(response => {
+        return response.json();
+    }).then(json => {
+        if (json.state === "ok") {
+            sessionStorage.setItem('AccessToken', json.access_token);
             dispatch(receiveAccessToken(json))
         } else {
             dispatch(errorAccessToken(json.message))
