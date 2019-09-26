@@ -1,26 +1,18 @@
-import React, {Component, Fragment} from "react";
-import {Route, Redirect} from "react-router-dom";
-import {connect} from 'react-redux';
+import React, {Fragment} from "react";
+import {Redirect, Route} from "react-router-dom";
+import {useSelector} from 'react-redux';
 
 
-class PrivateRoute extends Component {
-    render() {
-        return (
-            <Fragment>
-            {this.props.loggedIn
-                ? <Route {...this.props}/>
-                : <Redirect to='/login' />
-            }
-            </Fragment>
-        );
-    }
-}
+const PrivateRoute = (props) => {
+    const loggedIn = useSelector(state => state.session.loggedIn);
+    return (
+        <Fragment>
+            {loggedIn ? <Route {...props}/> : <Redirect to='/login' />}
+        </Fragment>
+    );
+};
 
 PrivateRoute.propTypes = Route.propTypes;
 PrivateRoute.defaultProps = Route.defaultProps;
 
-const mapStateToProps = state => ({
-    loggedIn: state.session.loggedIn
-});
-
-export default connect(mapStateToProps)(PrivateRoute);
+export default PrivateRoute;

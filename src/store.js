@@ -5,8 +5,6 @@ import {createLogger} from "redux-logger";
 
 const loggerMiddleware = createLogger();
 
-
-
 export default function configureStore() {
   return createStore(
     rootReducer,

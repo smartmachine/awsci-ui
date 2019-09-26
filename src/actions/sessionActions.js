@@ -1,4 +1,5 @@
 import fetch from 'cross-fetch'
+import { getUserInfo } from './userInfoActions';
 
 export const REQUEST_ACCESS_TOKEN = 'REQUEST_ACCESS_TOKEN';
 
@@ -52,6 +53,7 @@ export const getAccessToken = (code) => dispatch => {
         if (json.state === "ok") {
             sessionStorage.setItem('AccessToken', json.access_token);
             dispatch(receiveAccessToken(json))
+            dispatch(getUserInfo(json.access_token))
         } else {
             dispatch(errorAccessToken(json.message))
         }
@@ -71,7 +73,8 @@ export const updateAccessToken = () => dispatch => {
     }).then(json => {
         if (json.state === "ok") {
             sessionStorage.setItem('AccessToken', json.access_token);
-            dispatch(receiveAccessToken(json))
+            dispatch(receiveAccessToken(json));
+            dispatch(getUserInfo(json.access_token))
         } else {
             dispatch(errorAccessToken(json.message))
         }

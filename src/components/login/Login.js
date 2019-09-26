@@ -1,102 +1,83 @@
-import React, {Component} from 'react';
+import React, {useEffect} from 'react';
+
 import Container from 'react-bootstrap/Container';
 import Jumbotron from 'react-bootstrap/Jumbotron';
 import Button from 'react-bootstrap/Button';
-import {connect} from 'react-redux';
-
-import { parse as parseQueryString } from 'query-string';
-
-import { fetchCognitoInfo } from '../../actions/cognitoActions'
-import { getAccessToken, updateAccessToken } from '../../actions/sessionActions'
-
 import Alert from "react-bootstrap/Alert";
 import Spinner from "react-bootstrap/Spinner";
 
-class Login extends Component {
+import {useDispatch, useSelector} from 'react-redux';
+import {parse as parseQueryString} from 'query-string';
+import {withRouter} from "react-router-dom";
 
-    constructor(props) {
-        super(props);
-        this.state = { loginError: false }
-    }
 
-    componentDidMount() {
-        const params = parseQueryString(this.props.location.search);
+import {fetchCognitoInfo} from '../../actions/cognitoActions'
+import {getAccessToken, updateAccessToken} from '../../actions/sessionActions'
 
+import './Login.css';
+
+const hasSessionToken = () => {
+    return sessionStorage.getItem('AccessToken') != null;
+};
+
+const Login = (props) => {
+
+    const dispatch = useDispatch();
+    const loggedIn = useSelector(state => state.session.loggedIn);
+    const loginError = useSelector(state => state.session.loginError);
+    const errorMessage = useSelector(state => state.session.error);
+    const sessionFetching = useSelector(state => state.session.isFetching);
+    const hasCognitoInfo = useSelector(state => state.cognito.hasInfo);
+    const cognitoURL = useSelector(state => state.cognito.url);
+
+    useEffect(() => {
+
+        const params = parseQueryString(props.location.search);
         if ('code' in params && params.code != null) {
-            console.log("Cognito Authorization Code: " + params.code);
-            this.props.getAccessToken(params.code);
-            //this.props.history.push('/login')
-        } else if (this.hasSessionToken()) {
-            this.props.updateAccessToken();
+            props.history.push('/login');
+            dispatch(getAccessToken(params.code));
+        } else if (sessionFetching) {
+            console.log("Waiting for session data.")
+        } else if (loggedIn) {
+            props.history.push('/admin');
+        } else if (loginError) {
+            console.log("Error logging in!");
+        } else if (hasSessionToken()) {
+            dispatch(updateAccessToken())
         } else {
-                this.props.getCognitoInfo()
+            dispatch(fetchCognitoInfo())
         }
-    }
+    }, [props.location.search, props.history, loggedIn, dispatch, loginError, sessionFetching]);
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        console.log('Login.componentDidUpdate()');
-        console.log('  Properties:', this.props);
-        console.log('  State:     ', this.state);
-        if (!this.props.session.loggedIn && prevProps.session.isFetching) {
-            console.log("  Login Error!");
-            this.setState({loginError: true})
-        }
-        if (this.props.session.loggedIn) {
-            console.log("  Logged in!");
-            this.setState({loginError: false});
-            this.props.history.push('/');
-        }
-    }
-
-    hasSessionToken = () => {
-        return sessionStorage.getItem('AccessToken') != null;
+    const closeAlert = () => {
+        props.history.push('/login');
+        dispatch(fetchCognitoInfo());
     };
 
-    closeAlert = () => {
-        this.setState({loginError: false});
-        this.props.history.push('/login');
-        this.props.getCognitoInfo()
-    };
+    return (
+        <Container className="p-3">
+            <Jumbotron>
+                <h1 className="header">Welcome To AWSci</h1>
+                <p/>
+                {loginError &&
+                <Alert variant="danger" onClose={closeAlert} dismissible>
+                    <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
+                    <p>
+                        Login error!  Some message: {errorMessage}
+                    </p>
+                </Alert>
+                }
+                <p/>
+                {!sessionFetching &&
+                <Button href={cognitoURL} disabled={!hasCognitoInfo}>Login</Button>
+                }
+                {sessionFetching &&
+                <Spinner animation={"border"}/>
+                }
+                <p/>
+            </Jumbotron>
+        </Container>
+    );
+};
 
-    render() {
-
-        return (
-            <div>
-                <Container className="p-3">
-                    <Jumbotron>
-                        <h1 className="header">Welcome To AWSci</h1>
-                        <p/>
-                        {this.state.loginError &&
-                        <Alert variant="danger" onClose={this.closeAlert} dismissible>
-                            <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
-                            <p>
-                                Login error!  Some message: {this.props.session.error}
-                            </p>
-                        </Alert>
-                        }
-                        <p/>
-                        {!this.props.session.isFetching &&
-                        <Button href={this.props.cognito.url} disabled={!this.props.cognito.hasInfo}>Login</Button>
-                        }
-                        {this.props.session.isFetching &&
-                        <Spinner animation={"border"}/>
-                        }
-                        <p/>
-                    </Jumbotron>
-                </Container>
-            </div>
-        );
-    }
-}
-
-const mapStateToProps = state => ({
-    ...state
-});
-
-const mapDispatchToProps = dispatch => ({
-    getCognitoInfo: () => dispatch(fetchCognitoInfo()),
-    getAccessToken: (code) => dispatch(getAccessToken(code)),
-    updateAccessToken: () => dispatch(updateAccessToken())
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(Login);
+export default withRouter(Login);
