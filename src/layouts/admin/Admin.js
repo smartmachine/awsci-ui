@@ -1,7 +1,5 @@
 import React, {useState} from "react";
 
-// Important to load local CSS first so it actually overrides bootstrap
-import "./Admin.css"
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -11,18 +9,20 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import Navigation from "../../components/navigation/Navigation";
 import Layouts from "../../components/layouts/Layouts";
 
+import "./Admin.css"
+
 const Admin = () => {
 
     const [title, setTitle] = useState('Admin');
     const firstName = useSelector(state => state.userInfo.name);
 
     return (
-        <Container fluid={true} className="pl-0 pr-0">
-            <Row>
+        <Container fluid className="px-0">
+            <Row className="mr-0">
                 <Col sm={2} className="pr-0">
                     <Sidebar/>
                 </Col>
-                <Col sm={10} className="pl-0 content-panel">
+                <Col sm={10} className="mr-0 px-0 content-panel">
                     <Navigation navigationTitle={title} userName={firstName}/>
                     <Layouts titleSetter={setTitle}/>
                 </Col>

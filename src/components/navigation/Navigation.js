@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from "react";
 import * as PropTypes from 'prop-types';
 
-import './Navigation.css'
 import Navbar from "react-bootstrap/Navbar";
 import Nav from "react-bootstrap/Nav";
 import NavDropdown from "react-bootstrap/NavDropdown";
@@ -9,6 +8,8 @@ import {LinkContainer} from "react-router-bootstrap";
 
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faSignOutAlt, faTools, faUser, faUserCog} from "@fortawesome/free-solid-svg-icons";
+
+import './Navigation.css'
 
 const Navigation = (props) => {
 
@@ -21,7 +22,7 @@ const Navigation = (props) => {
     }, [props.userName]);
 
     return (
-        <Navbar bg="light" variant="light" expand={true} className="bottom-border">
+        <Navbar bg="light" variant="light" expand={true} className="bottom-border flex-grow-1">
             <Navbar.Brand>{props.navigationTitle}</Navbar.Brand>
             <Nav className="ml-auto">
                 <NavDropdown id='userMenu' title={userIcon}>

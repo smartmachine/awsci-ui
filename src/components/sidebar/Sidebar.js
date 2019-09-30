@@ -9,29 +9,30 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faGithub} from "@fortawesome/free-brands-svg-icons";
 import {faIndustry, faLayerGroup} from "@fortawesome/free-solid-svg-icons";
 
+import './Sidebar.css';
 
 const Sidebar = () => {
 
     return (
-        <Card bg={"dark"} border={"dark"} text={"light"} className="sidebar-square-corners min-vh-100">
+        <Card bg={"dark"} border={"dark"} text={"light"} className="sidebar-square-corners  min-vh-100">
             <Card.Body className="flex-grow-0">
                 <Card.Title><Link to="/">AWSci Console</Link></Card.Title>
                 <Card.Subtitle className="mb-2 text-muted">
                     Navigation
                 </Card.Subtitle>
             </Card.Body>
-            <ListGroup className="sidebar-menu flex-grow-1" variant={"flush"}>
-                <ListGroupItem variant={"dark"}>
+            <ListGroup className="sidebar-menu flex-grow-1" variant="flush">
+                <ListGroupItem>
                     <Link to="/admin/repos">
                         <FontAwesomeIcon icon={faGithub} inverse={true}/>&nbsp;&nbsp;Repositories
                     </Link>
                 </ListGroupItem>
-                <ListGroupItem variant={"dark"}>
+                <ListGroupItem>
                     <Link to="/admin/pipelines">
                         <FontAwesomeIcon icon={faIndustry} inverse={true}/>&nbsp;&nbsp;Pipelines
                     </Link>
                 </ListGroupItem>
-                <ListGroupItem variant={"dark"}>
+                <ListGroupItem>
                     <Link to="/admin/environments">
                         <FontAwesomeIcon icon={faLayerGroup} inverse={true}/>&nbsp;&nbsp;Environments
                     </Link>

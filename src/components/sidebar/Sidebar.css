@@ -1,0 +1,28 @@
+.sidebar-square-corners {
+    border-radius: 0;
+}
+
+.sidebar-menu .list-group-item {
+    background-color: #343a40;
+    color: #f8f9fa;
+    border-left-color: #fff;
+    border-right-color: #fff;
+}
+
+.sidebar-menu a,
+.sidebar-menu a:visited {
+    color: #f8f9fa;
+    text-decoration: none;
+}
+
+.sidebar-menu a:hover {
+    color: yellow;
+    text-decoration: none;
+}
+
+.card-title a,
+.card-title a:visited,
+.card-title a:hover {
+    color: #f8f9fa;
+    text-decoration: none;
+}
